@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Productivity Checker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-title {
+      background: linear-gradient(90deg, #06b6d4, #3b82f6, #a855f7, #06b6d4);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradient-move 6s ease infinite;
+    }
+    @keyframes gradient-move {
+      0% { background-position: 0 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0 50%; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white p-4">
+
+  <div class="text-center w-full max-w-3xl mx-auto">
+    <h1 class="text-5xl lg:text-6xl font-extrabold gradient-title drop-shadow-lg mt-8">
+      Email Productivity Checker
+    </h1>
+    <p class="mt-3 text-lg text-gray-300">Analise seus e-mails em busca de produtividade e clareza</p>
+
+    <div id="input-container" class="mt-10 bg-black/40 backdrop-blur-lg border border-gray-800 rounded-2xl shadow-xl p-8 w-[480px] max-w-full mx-auto">
+
+      <div class="flex mb-6 bg-black/40 rounded-lg overflow-hidden border border-gray-800">
+        <button id="tab-text" class="flex-1 py-3 text-base font-medium bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-lg transition">
+          Texto
+        </button>
+        <button id="tab-file" class="flex-1 py-3 text-base font-medium text-gray-400 hover:text-white transition">
+          Arquivo
+        </button>
+      </div>
+
+      <div id="content-text" class="transition-opacity duration-500 ease-in-out opacity-100">
+        <label for="email-text"></label>
+        <textarea
+          id="email-text"
+          class="w-full h-40 p-4 rounded-lg bg-black/60 border border-gray-800 text-gray-200 placeholder-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          placeholder="Cole o conteúdo do e-mail aqui..."></textarea>
+      </div>
+
+      <div id="content-file" class="hidden transition-opacity duration-500 ease-in-out opacity-0">
+        <label for="file-upload" id="file-label" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer bg-black/60 hover:border-cyan-400 transition">
+          <svg id="file-icon" class="w-12 h-12 text-cyan-400 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v4h16v-4"></path>
+          </svg>
+          <span id="file-message" class="text-gray-300 font-medium">Clique para enviar um arquivo</span>
+          <span id="file-sub" class="text-gray-500 text-sm">Suporta .txt, .pdf</span>
+          <input id="file-upload" type="file" class="hidden" accept=".txt,.pdf" />
+        </label>
+      </div>
+
+      <button id="analyze-btn" class="mt-6 w-full py-4 rounded-lg text-white text-lg font-semibold bg-gradient-to-r from-cyan-500 to-purple-500 hover:opacity-90 transition">
+        Analisar E-mail
+      </button>
+    </div>
+
+    <div id="result-container" class="mt-6 p-6 bg-black/40 backdrop-blur-lg border border-gray-800 rounded-2xl shadow-lg w-[528px] max-w-full mx-auto h-auto break-words whitespace-pre-wrap max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+      <h2 class="text-xl font-bold text-white mb-2">Resultado da Análise</h2>
+      <p id="classification" class="text-lg text-cyan-400 font-semibold mb-1"></p>
+      <p id="response" class="text-gray-200"></p>
+    </div>
+  </div>
+
+  <script>
+    const tabText = document.getElementById("tab-text");
+    const tabFile = document.getElementById("tab-file");
+    const contentText = document.getElementById("content-text");
+    const contentFile = document.getElementById("content-file");
+    const analyzeBtn = document.getElementById("analyze-btn");
+    const textarea = document.getElementById("email-text");
+    const fileInput = document.getElementById("file-upload");
+    const fileMessage = document.getElementById("file-message");
+    const fileSub = document.getElementById("file-sub");
+    const fileIcon = document.getElementById("file-icon");
+    const resultContainer = document.getElementById("result-container");
+    const resultClassificacao = document.getElementById("classification");
+    const resultResposta = document.getElementById("response");
+
+    let activeTab = "text";
+
+    tabText.addEventListener("click", () => {
+      activeTab = "text";
+      tabText.classList.add("bg-gradient-to-r", "from-cyan-500", "to-purple-500", "text-white", "rounded-lg");
+      tabFile.classList.remove("bg-gradient-to-r", "from-cyan-500", "to-purple-500", "text-white", "rounded-lg");
+      tabFile.classList.add("text-gray-400");
+
+      contentFile.classList.add("opacity-0");
+      setTimeout(() => {
+        contentFile.classList.add("hidden");
+        contentText.classList.remove("hidden");
+        setTimeout(() => contentText.classList.remove("opacity-0"), 50);
+      }, 300);
+    });
+
+    tabFile.addEventListener("click", () => {
+      activeTab = "file";
+      tabFile.classList.add("bg-gradient-to-r", "from-cyan-500", "to-purple-500", "text-white", "rounded-lg");
+      tabText.classList.remove("bg-gradient-to-r", "from-cyan-500", "to-purple-500", "text-white", "rounded-lg");
+      tabText.classList.add("text-gray-400");
+
+      contentText.classList.add("opacity-0");
+      setTimeout(() => {
+        contentText.classList.add("hidden");
+        contentFile.classList.remove("hidden");
+        setTimeout(() => contentFile.classList.remove("opacity-0"), 50);
+      }, 300);
+    });
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        const fileName = fileInput.files[0].name;
+        fileMessage.textContent = `Arquivo selecionado: ${fileName}`;
+        fileSub.textContent = "Clique aqui para escolher outro arquivo";
+        fileIcon.classList.replace("text-cyan-400", "text-green-400");
+      } else {
+        fileMessage.textContent = "Clique para enviar um arquivo";
+        fileSub.textContent = "Suporta .txt, .pdf";
+        fileIcon.classList.replace("text-green-400", "text-cyan-400");
+      }
+    });
+
+    analyzeBtn.addEventListener("click", async () => {
+      let result;
+      if (activeTab === "text") {
+        const content = textarea.value.trim();
+        if (!content) { alert("Por favor, insira um texto."); return; }
+
+        try {
+          const response = await fetch("http://127.0.0.1:8000/text", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ emailContent: content })
+          });
+          result = await response.json();
+        } catch (error) {
+          result = { classification: "Erro", response: "Não foi possível analisar o e-mail." };
+        }
+
+      } else if (activeTab === "file") {
+        if (fileInput.files.length === 0) { alert("Por favor, selecione um arquivo."); return; }
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          const response = await fetch("http://127.0.0.1:8000/file", { method: "POST", body: formData });
+          result = await response.json();
+        } catch (error) {
+          result = { classification: "Erro", response: "Não foi possível analisar o arquivo." };
+        }
+      }
+
+      resultClassificacao.textContent = result.classificacao;
+      resultResposta.textContent = result.resposta;
+
+      resultContainer.style.maxHeight = "0px";
+      setTimeout(() => {
+        resultContainer.style.maxHeight = resultContainer.scrollHeight + "px";
+      }, 50);
+    });
+  </script>
+</body>
+</html>
