@@ -135,7 +135,7 @@
         if (!content) { alert("Por favor, insira um texto."); return; }
 
         try {
-          const response = await fetch("https://back-email.felipe.fun/text/", {
+          const response = await fetch("https://backenddesafioautou-production.up.railway.app/text/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ emailContent: content })
@@ -152,7 +152,7 @@
         formData.append("file", file);
 
         try {
-          const response = await fetch("https://back-email.felipe.fun/file/", { method: "POST", body: formData });
+          const response = await fetch("https://backenddesafioautou-production.up.railway.app/file/", { method: "POST", body: formData });
           result = await response.json();
         } catch (error) {
           result = { classification: "Erro", response: "Não foi possível analisar o arquivo." };
